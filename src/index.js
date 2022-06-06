@@ -1,217 +1,117 @@
-//Imports
 import '@fortawesome/fontawesome-free/css/all.css';
-import '@fortawesome/fontawesome-free/js/all.js'
+import '@fortawesome/fontawesome-free/js/all.js';
 import './style.css';
+import Storage from '../modules/Storage.js';
 
-//Declare HTML elements
-//section
-const mainSection = document.getElementById('main-section');
-//textInput
-const mainInput = document.getElementById('main-input');
-//todosMainContainer
-const listOfItems = document.querySelector('.list');
-//clearAllbtn
-const ClearAll = document.querySelector('.clear-all');
+const updateList = () => {
+  const lists = new Storage().getStorage();
+  document.getElementById('list-block').innerHTML = '';
+  lists.forEach((list) => {
+    let classes = 'task-description';
+    let checked = '';
+    if (list.completed) {
+      classes = 'task-description active';
+      checked = 'checked';
+    }
+    const card = `
+    <li class = "list"><div class="check-input"><input type="checkbox" class="check" id="${list.index}" name="${list.index}" value="${list.index}"${checked}>
+        <label id="label${list.index}" for="${list.index}" class="${classes}">${list.description}</label></div>
+        <span class="dots">
+        <span class="close-task" id="${list.index}">
+          <i class="fa-solid fa-rectangle-xmark"></i>
+        </span>
+        <span class="edit-task" id="${list.index}">
+        <i class="fa-solid fa-ellipsis-vertical"></i>
+        </span>
+      </span></li>`;
+    document.getElementById('list-block').innerHTML += card;
+  });
 
-//Make class for list Items
-class ListItem {
-  constructor(description, completed, index) {
-    this.description = description;
-    this.completed = completed;
-    this.index = index;
-  }
-}
+  const removeTasks = document.querySelectorAll('.close-task');
+  const editTasks = document.querySelectorAll('.edit-task');
+  const checkBoxes = document.querySelectorAll('.check');
 
-//Create array to store items
-const itemArray = [];
-
-//Add new item
-const addNewItem = (newDescription) => {
-  const newItem = document.createElement('div');
-  newItem.classList.add('list');
-  newItem.innerHTML += `
-<input type="checkbox" class="checkbox">
-<span>${newDescription}</span>
-<span class="ellipsis">
-<i class="fa-solid fa-ellipsis-vertical"></i>
-</span>
-<i class="fa-solid fa-trash-can"></i>
-`;
-  listOfItems.appendChild(newItem);
-  // make checkbox work
-  const checkbox = document.querySelectorAll('.checkbox');
-  checkbox.forEach(checkboxInput => {
-    checkboxInput.addEventListener('click', () => {
-      checkboxInput.nextElementSibling.classList.toggle('strike');
-      checkboxInput.parentNode.classList.toggle('clicked-on');
-      const ellipsisIcon = checkboxInput.parentNode.childNodes[5];
-      ellipsisIcon.classList.toggle('inactive-ellipsis');
-      const trashIcon = checkboxInput.parentNode.childNodes[7];
-      trashIcon.classList.toggle('active-trash');
-      completeItem();
+  checkBoxes.forEach((checkBox) => {
+    checkBox.addEventListener('change', (e) => {
+      e.preventDefault();
+      const check = checkBox.getAttribute('id') * 1;
+      const localStorage = new Storage();
+      const lists = localStorage.getStorage();
+      if (checkBox.checked) {
+        lists[check - 1].completed = true;
+      } else {
+        lists[check - 1].completed = false;
+      }
+      localStorage.localStorage(lists);
+      updateList();
     });
   });
-  //Create and send new item to local storage
-  const newListItem = new ListItem(newDescription, false, checkbox.length - 1);
-  itemArray.push(newListItem);
-  const stringedItems = JSON.stringify(itemArray);
-  localStorage.setItem('items', stringedItems);
-  //Edit items
-  const editItem = document.querySelectorAll('.ellipsis');
-  editItem.forEach(item => { //editIcons
-    item.addEventListener('click', () => {
-      item.parentNode.classList.add('clicked-on');
-      editItems(item.previousElementSibling); //works half the time
+
+  editTasks.forEach((editTask) => {
+    editTask.addEventListener('click', (e) => {
+      e.preventDefault();
+      const localStorage = new Storage();
+      const lists = localStorage.getStorage();
+      const task = editTask.getAttribute('id') * 1 - 1;
+      const newTask = prompt('Change task');
+      lists[task].description = newTask;
+      localStorage.localStorage(lists);
+      updateList();
     });
-  })
-  //Remove items
-  const removeItem = document.querySelectorAll('.active-trash');
-  removeItem.forEach((item) => {
-    item.addEventListener('click', () => {
-      removeItems(item.parentNode);
+  });
+
+  removeTasks.forEach((removeTask) => {
+    removeTask.addEventListener('click', (e) => {
+      e.preventDefault();
+      const localStorage = new Storage();
+      const index = removeTask.getAttribute('id') * 1 - 1;
+      const lists = localStorage.getStorage();
+      const taskDelete = lists.filter((item, key) => {
+        if (key !== index) {
+          return true;
+        }
+        return null;
+      });
+      for (let i = 0; i < taskDelete.length; i += 1) {
+        taskDelete[i].index = i + 1;
+      }
+      localStorage.localStorage(taskDelete);
+      updateList();
     });
-  })
-}
-//Add event listener to input field
-mainInput.addEventListener('keypress', (e) => {
-  if (e.key === 'Enter' && mainInput.value) {
-    addNewItem(mainInput.value);
-    mainInput.value = null;
-  }
+  });
+};
+updateList();
+
+const lists = [];
+lists.sort((a, b) => a.index - b.index);
+
+const AddtoList = document.querySelector('.add-button');
+
+AddtoList.addEventListener('click', (e) => {
+  e.preventDefault();
+  const localStorage = new Storage();
+  const lists = localStorage.getStorage();
+  const lastIndex = lists.length + 1;
+  lists.push({
+    description: document.getElementById('add').value,
+    completed: false,
+    index: lastIndex,
+  });
+  localStorage.localStorage(lists);
+  document.getElementById('add').value = '';
+  updateList();
 });
 
-//Edit items
-const editItems = (oldItem) => {
-  const newInput = document.createElement('input');
-  newInput.type = 'text';
-  newInput.classList.add('new-input');
-  newInput.value = oldItem.textContent;
-  oldItem.replaceWith(newInput);
-  newInput.addEventListener('keypress', e => {
-    if (e.key === 'Enter') {
-      const data = JSON.parse(localStorage.getItem('items'));    
-      editItem.forEach((item) => {
-        if (item.description === newInput.value) {
-          const newId = newInput.getAttribute('id' * 1);
-          item.index = newId;
-        }
-      });
+const clearCompleted = document.querySelector('.button');
 
-      // const editedContainers = document.querySelectorAll('.new-item');
-      // const parsedItems = localStorage.getItem('items');
-      // const localData = JSON.parse(parsedItems);
-      //fetch item based on class 'strike'
-      // for (let i = 0; i < editedContainers.length; i++) {
-      //   if (editedContainers[i].classList.contains('clicked-on')) {
-      //     localData[i].description = newInput.value;
-      //     const stringedData = JSON.stringify(localData);
-      //     localStorage.setItem('items', stringedData);
-      //   }
-      // }
-      // newInput.parentNode.classList.remove('clicked-on');
-      // newInput.replaceWith(oldItem);
-      // oldItem.textContent = newInput.value;
-    }
-  })
-}
-//Remove items
-const removeItems = (li) => {
-  listOfItems.removeChild(li);
-  let count = 0;
-  const parsedItems = localStorage.getItem('items');
-  const localData = JSON.parse(parsedItems);
-  const arrayData = Array.from(localData);
-  //Filter true elements
-  arrayData.filter((item) => {
-    item.completed === false;
-  });
-  //Update index of elements
-  arrayData.map((item) => {
-    item.index = count++;
-  });
-  localStorage.setItem('items', JSON.stringify(arrayData));
-}
-
-//get data from local storage
-const getItemsLocal = () => {
-  let localItems = localStorage.getItem('items');
-  let items = JSON.parse(localItems);
-  items.map((item) => {
-    itemArray.push(item);
-    const newItem = document.createElement('div');
-    newItem.classList.add('new-item');
-    const newId = item.index;
-    newItem.setAttribute('id', newId);
-    newItem.innerHTML = `
-  <input type="checkbox" class="checkbox" id="${item.index}">
-  <span id="span${item.index}">${item.description}</span>
-  <span id="ellipsis${item.index}" class="ellipsis">
-  <i class="fa-solid fa-ellipsis-vertical"></i>
-  </span>
-  <span>
-  <i class="fa-solid fa-trash-can"></i>
-  `
-    listOfItems.appendChild(newItem);
-    const editItem = document.querySelectorAll('.ellipsis');
-    editItem.forEach((item) => { //editIcons, loop works half the time
-      item.addEventListener("click", () => {
-        item.parentNode.classList.add('clicked-on'); //works half the time
-        editItems(item.previousElementSibling, newItem); //works half the time
-      });
-    })
-  });
-
-  const checkbox = document.querySelectorAll('.checkbox');
-  checkbox.forEach(checkboxInput => {
-    checkboxInput.addEventListener('click', () => {
-      checkboxInput.nextElementSibling.classList.toggle('strike');
-      checkboxInput.parentNode.classList.toggle('clicked-on');
-      const ellipsisIcon = checkboxInput.parentNode.childNodes[5];
-      ellipsisIcon.classList.toggle('inactive-ellipsis');
-      const trashIcon = checkboxInput.parentNode.childNodes[7];
-      trashIcon.classList.toggle('active-trash');
-      completeItem();
-    });
-  });
-  //Remove items
-  const removeItem = document.querySelectorAll('.trash');
-  removeItem.forEach((item) => {
-    item.addEventListener('click', (e) => {
-      e.preventDefault
-      alert('hello')
-      const remove = document.getAttribute('id');
-      console.log(remove)
-      removeItems(item.parentNode);
-    });
-  });
-  localStorage.setItem('items', JSON.stringify(itemArray));
-}
-window.addEventListener("load", getItemsLocal);
-
-const completeItem = () => {
-  const localData = localStorage.getItem('items');
-  const parsedData = JSON.parse(localData);
-  const eachItem = document.querySelectorAll('span');
-  for (let i = 0; i > eachItem.length; i += 1) {
-    if (eachItem[i].classList.contains('strike')) {
-      localData[i].completed = true;
-    } else {
-      localData[i].completed = false;
-    }
-  }
-  localStorage.getItem('items', JSON.stringify(parsedData));
-}
-
-const clear = document.querySelector('.clear-all');
-
-clear.addEventListener('click', (e) => {
-  e.preventDefault()
-  let localItems = localStorage.getItem('items');
-  let items = JSON.parse(localItems);
-  const checkDelete = items.filter((items) => items.completed === false);
+clearCompleted.addEventListener('click', (e) => {
+  e.preventDefault();
+  const localStorage = new Storage();
+  const lists = localStorage.getStorage();
+  const checkDelete = lists.filter((lists) => lists.completed === false);
   for (let i = 0; i < checkDelete.length; i += 1) {
     checkDelete[i].index = i + 1;
   }
-  localStorage.setItem('items', JSON.stringify(checkDelete));
-  
-})
+  localStorage.localStorage(checkDelete);
+  updateList();
+});

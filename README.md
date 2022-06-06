@@ -1,46 +1,71 @@
 ![](https://img.shields.io/badge/Microverse-blueviolet)
 
-# To-DO List 
+# Wbpack-To-Do-List
 
-> In this project I'm creating an interactive to-do list
+> Description the project.
+build a To-Do-List using webpack and ES6 syntax
+
 
 ## Built With
 
-- HTML, CSS, JS
-- Git, Github
+- HTML,CSS,JavaScript
+- 
+- 
+
+## Live Demo (if available)
+
+[Live Demo Link]()
+
 
 ## Getting Started
-### To launch the project locally:
-#### Step 1:
-- Clone this repo locally using git in the command line and the following command
- ```bash
- > git clone 
- ```
-- Alternatively, you can just download the complete zip file and extract the folder in your directory
-#### Step 2:
-- In the terminal, you can run:
-```bash
-> cd portfolio
-> code .
-```
-- Then open index.html in a live server.
 
-## Online version
+
+To get a local copy up and running follow these simple example steps.
+
+### Prerequisites
+Github profile and code editor
+
+### Setup
+copy the repository from the drop down code menu
+
+### Install
+clone the repository to your local machine through your code editor using git clone
+
+git clone https://github.com/fibini/Wbpack-To-Do-List.git
+
+### Usage
+
+### Run tests
+
+### Deployment
+https://fibini.github.io/Wbpack-To-Do-List/dist
+
 
 
 ## Authors
 
-👤 **Dafne Azzolina**
+👤 **Author1**
 
-- GitHub: [@Daf98](https://github.com/Daf98)
-- Twitter: [@dafne_azzolina](https://twitter.com/dafne_azzolina)
-- LinkedIn: [dafne-azzolina](https://www.linkedin.com/in/dafne-azzolina/)
+- GitHub: [@fibini](https://github.com/fibini)
+- Twitter: [@Onenewpage1](https://twitter.com/Onenewpage1)
+- LinkedIn: [fabien brathwaite](https://www.linkedin.com/in/fabien-brathwaite-91150822a/)
 
+## 🤝 Contributing
+
+Contributions, issues, and feature requests are welcome!
+
+Feel free to check the [issues page](../../issues/).
 
 ## Show your support
 
 Give a ⭐️ if you like this project!
 
+## Acknowledgments
+
+- Hat tip to anyone whose code was used
+- Inspiration
+- etc
+
 ## 📝 License
 
-This project is [MIT](https://www.mit.edu/) licensed.
+This project is [MIT](./MIT.md) licensed.
